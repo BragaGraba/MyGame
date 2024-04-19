@@ -1786,24 +1786,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\wangyy07\\.nuget\\packages\\": {},
-    "D:\\VSTools\\NuGetPackages": {}
+    "C:\\Users\\12205\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "F:\\myworkspace\\新建文件夹\\ServerProgram\\ServerProgram.csproj",
+      "projectUniqueName": "D:\\work\\Unity Projects\\MyGameDemo\\MyGame\\ServerProgram\\ServerProgram.csproj",
       "projectName": "ServerProgram",
-      "projectPath": "F:\\myworkspace\\新建文件夹\\ServerProgram\\ServerProgram.csproj",
-      "packagesPath": "C:\\Users\\wangyy07\\.nuget\\packages\\",
-      "outputPath": "F:\\myworkspace\\新建文件夹\\ServerProgram\\obj\\",
+      "projectPath": "D:\\work\\Unity Projects\\MyGameDemo\\MyGame\\ServerProgram\\ServerProgram.csproj",
+      "packagesPath": "C:\\Users\\12205\\.nuget\\packages\\",
+      "outputPath": "D:\\work\\Unity Projects\\MyGameDemo\\MyGame\\ServerProgram\\obj\\",
       "projectStyle": "PackageReference",
-      "fallbackFolders": [
-        "D:\\VSTools\\NuGetPackages"
-      ],
       "configFilePaths": [
-        "C:\\Users\\wangyy07\\AppData\\Roaming\\NuGet\\NuGet.Config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+        "C:\\Users\\12205\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [

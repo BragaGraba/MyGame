@@ -8,6 +8,6 @@ build_property.PlatformNeutralAssembly =
 build_property.EnforceExtendedAnalyzerRules = 
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = ServerProgram
-build_property.ProjectDir = F:\myworkspace\新建文件夹\ServerProgram\
+build_property.ProjectDir = D:\work\Unity Projects\MyGameDemo\MyGame\ServerProgram\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
