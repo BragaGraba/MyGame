@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Net;
 using System.Net.Sockets;
+using ServerProgram.core;
+using ServerProgram.core.manager;
 using ServerProgram.Net;
 
 class MainClass
@@ -57,5 +59,39 @@ class MainClass
                     return;
             }
         }
+    }
+
+    private static void TestDataMgr()
+    {
+        DataMgr dataMgr = new DataMgr();
+        bool ret = dataMgr.Register("Wyy", "123");
+        if (ret)
+            Console.WriteLine("注册成功");
+        else
+            Console.WriteLine("注册失败");
+
+        ret = dataMgr.CreatePlayer("Wyy");
+        if (ret)
+            Console.WriteLine("创建玩家成功");
+        else
+            Console.WriteLine("创建玩家失败");
+
+        PlayerData pd = dataMgr.GetPlayerData("Wyy");
+        if (pd != null)
+            Console.WriteLine("获取玩家成功 " + pd.score);
+        else
+            Console.WriteLine("获取玩家数据失败");
+
+        pd.score += 10;
+        Player p = new Player();
+        p.id = "Wyy";
+        p.data = pd;
+        dataMgr.SavePlayer(p);
+
+        pd = dataMgr.GetPlayerData("Wyy");
+        if (pd != null)
+            Console.WriteLine("获取玩家成功 " + pd.score);
+        else
+            Console.WriteLine("获取玩家数据失败");
     }
 }

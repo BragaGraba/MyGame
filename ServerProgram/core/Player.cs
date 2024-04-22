@@ -16,5 +16,8 @@ namespace ServerProgram.core
 
         // 数据
         public PlayerData data;
+
+        // 临时数据
+        public PlayerTempData tempData;
     }
 }
