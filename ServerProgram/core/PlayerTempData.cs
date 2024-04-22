@@ -8,6 +8,6 @@ namespace ServerProgram.core
 {
     public class PlayerTempData
     {
-
+        public PlayerTempData() { }
     }
 }
