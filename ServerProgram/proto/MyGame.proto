@@ -1,0 +1,7 @@
+syntax = "proto3";
+
+option csharp_namespace = "MyGameProto"; // 设置C#命名空间
+
+message HeartBeat {
+	uint64 time = 1;
+}
