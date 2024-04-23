@@ -2,6 +2,11 @@ syntax = "proto3";
 
 option csharp_namespace = "MyGameProto"; // 设置C#命名空间
 
+message Register {
+	optional string id = 1;
+	optional string pw = 2;
+}
+
 message HeartBeat {
 	uint64 time = 1;
 }

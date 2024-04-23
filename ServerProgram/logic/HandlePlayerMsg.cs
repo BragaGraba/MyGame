@@ -4,10 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ServerProgram.core
+namespace ServerProgram.logic
 {
-    public class ProtocolProtobuf : ProtocolBase
+    public partial class HandlePlayerMsg
     {
-        
     }
 }

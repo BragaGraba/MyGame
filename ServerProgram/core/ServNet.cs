@@ -7,6 +7,9 @@ using System.Net;
 using System.Net.Sockets;
 using ServerProgram.Net;
 using MySql.Data.MySqlClient;
+using ServerProgram.core.protocol;
+using ServerProgram.logic;
+using System.Reflection;
 
 namespace ServerProgram.core
 {
@@ -34,6 +37,14 @@ namespace ServerProgram.core
         /// 而服务器在同一时间能够接入的客户端数量是有限的，过量死连接会导致新连接无法进入。
         /// </summary>
         public long heartBeatTime = 180;
+
+        // 协议
+        public ProtocolBase proto;
+
+        // 消息分发
+        public HandleConnMsg handleConnMsg = new HandleConnMsg();
+        public HandlePlayerMsg handlePlayerMsg = new HandlePlayerMsg();
+        public HandlePlayerEvent handlePlayerEvent = new HandlePlayerEvent();
 
         // 单例
         public static ServNet instance;
@@ -218,9 +229,9 @@ namespace ServerProgram.core
                 return;
             }
             // 处理消息
-            string str = Encoding.UTF8.GetString(conn.readBuff, sizeof(Int32), conn.msgLength);
-            Console.WriteLine("收到消息 [" + conn.GetAdress() + "]" + str);
-            Send(conn, str);
+            //string str = Encoding.UTF8.GetString(conn.readBuff, sizeof(Int32), conn.msgLength);
+            ProtocolBase protocol = proto.Decode(conn.readBuff, sizeof(Int32), conn.msgLength);
+            HandleMsg(conn, protocol);
             // 清除已处理的消息
             int count = conn.buffCount - conn.msgLength - sizeof(Int32);
             Array.Copy(conn.readBuff, sizeof(Int32) + conn.msgLength, conn.readBuff, 0, count);
@@ -233,9 +244,9 @@ namespace ServerProgram.core
         }
 
         // 发送消息
-        public void Send(Conn conn, string str)
+        public void Send(Conn conn, ProtocolBase protocol)
         {
-            byte[] bytes = Encoding.UTF8.GetBytes(str);
+            byte[] bytes = protocol.Encode();
             byte[] length = BitConverter.GetBytes(bytes.Length);
             byte[] sendBuff = length.Concat(bytes).ToArray();
             try
@@ -245,6 +256,55 @@ namespace ServerProgram.core
             catch (Exception e)
             {
                 Console.WriteLine("[发送消息] " + conn.GetAdress() + ":" + e.Message);
+            }
+        }
+
+        public void BroadCast(ProtocolBase protocol)
+        {
+            for (int i = 0; i < conns.Length ; i++)
+            {
+                if (!conns[i].isUse)
+                    continue;
+                if (conns[i].player == null)
+                    continue;
+                Send(conns[i], protocol);
+            }
+
+        }
+
+        public void HandleMsg(Conn conn, ProtocolBase protoBase)
+        {
+            string name = protoBase.GetName();
+            Console.WriteLine("[收到协议] " + name);
+            string methodName = "Msg" + name;
+            // 通过反射的方法，用协议名获取处理函数
+            // 连接协议分发
+            if (conn.player == null || name == "HeartBeat" || name == "Logout")
+            {
+                MethodInfo mm = handleConnMsg.GetType().GetMethod(methodName);
+                if (mm == null)
+                {
+                    string str = "[警告]HandleMsg没有处理连接方法";
+                    Console.WriteLine(str + methodName);
+                    return;
+                }
+                Object[] obj = new object[]{conn, protoBase};
+                Console.WriteLine("[处理连接消息]" + conn.GetAdress() + " :" + name);
+                mm.Invoke(handleConnMsg, obj);
+            }
+            // 角色协议分发
+            else
+            {
+                MethodInfo mm = handlePlayerMsg.GetType().GetMethod(methodName);
+                if (mm == null)
+                {
+                    string str = "[警告]HandleMsg没有处理玩家方法";
+                    Console.WriteLine(str + methodName);
+                    return;
+                }
+                Object[] obj = new object[] { conn, protoBase };
+                Console.WriteLine("[处理玩家消息]" + conn.GetAdress() + " :" + name);
+                mm.Invoke(handlePlayerMsg, obj);
             }
         }
 

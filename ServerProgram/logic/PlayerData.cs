@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ProtoBuf;
 
-namespace ServerProgram.core
+namespace ServerProgram.logic
 {
     [ProtoContract]
     public class PlayerData

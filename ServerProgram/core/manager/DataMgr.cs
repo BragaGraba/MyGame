@@ -12,6 +12,7 @@ using Google.Protobuf;
 using MySql.Data.MySqlClient;
 using Org.BouncyCastle.Asn1.Crmf;
 using ProtoBuf;
+using ServerProgram.logic;
 
 namespace ServerProgram.core.manager
 {
