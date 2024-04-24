@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+option csharp_namespace = "MyGameProto"; // ÉèÖÃC#ÃüÃû¿Õ¼ä
+
+message PlayerReq {
+
+}
+
+message PlayerAck {
+
+}

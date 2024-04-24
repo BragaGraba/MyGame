@@ -19,6 +19,13 @@ namespace ServerProgram.core.protocol
             _message = new T();
         }
 
+        public ProtocolProtobuf(T message)
+        {
+            _message = message;
+        }
+
+
+
         // 注册消息类型，初始化解析器
         public static void RegisterMessageType()
         {

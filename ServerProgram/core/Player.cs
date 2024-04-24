@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using ServerProgram.core.protocol;
 using ServerProgram.core.manager;
 using ServerProgram.logic;
+using MyGameProto;
 
 namespace ServerProgram.core
 {
@@ -30,14 +31,14 @@ namespace ServerProgram.core
             tempData = new PlayerTempData();
         }
 
-        public void Send(ProtocolBase proto)
+        public void Send(MyGameAck ack)
         {
             if (conn == null)
                 return;
-            ServNet.instance.Send(conn, proto);
+            ServNet.instance.Send(conn, ack);
         }
 
-        public static bool KickOff(string id, ProtocolBase proto)
+        public static bool KickOff(string id, MyGameAck ack)
         {
             Conn[] conns = ServNet.instance.conns;
             for (int i = 0; i < conns.Length; i++)
@@ -50,8 +51,8 @@ namespace ServerProgram.core
                     continue;
                 if (conns[i].player.id == id)
                 {
-                    if (proto != null)
-                        conns[i].player.Send(proto);
+                    if (ack != null)
+                        conns[i].player.Send(ack);
 
                     return conns[i].player.Logout();
                 }

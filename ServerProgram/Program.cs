@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Sockets;
 using ServerProgram.core;
 using ServerProgram.core.manager;
+using ServerProgram.logic;
 using ServerProgram.Net;
 
 class MainClass
@@ -47,8 +48,8 @@ class MainClass
 
     private static void AsyncServ()
     {
-        Serv serv = new Serv();
-        serv.Start("127.0.0.1", 1234);
+        ServNet servNet = new ServNet();
+        servNet.Start("127.0.0.1", 1234);
 
         while(true)
         {
@@ -63,35 +64,35 @@ class MainClass
 
     private static void TestDataMgr()
     {
-        DataMgr dataMgr = new DataMgr();
-        bool ret = dataMgr.Register("Wyy", "123");
-        if (ret)
-            Console.WriteLine("注册成功");
-        else
-            Console.WriteLine("注册失败");
+        //DataMgr dataMgr = new DataMgr();
+        //bool ret = dataMgr.Register("Wyy", "123");
+        //if (ret)
+        //    Console.WriteLine("注册成功");
+        //else
+        //    Console.WriteLine("注册失败");
 
-        ret = dataMgr.CreatePlayer("Wyy");
-        if (ret)
-            Console.WriteLine("创建玩家成功");
-        else
-            Console.WriteLine("创建玩家失败");
+        //ret = dataMgr.CreatePlayer("Wyy");
+        //if (ret)
+        //    Console.WriteLine("创建玩家成功");
+        //else
+        //    Console.WriteLine("创建玩家失败");
 
-        PlayerData pd = dataMgr.GetPlayerData("Wyy");
-        if (pd != null)
-            Console.WriteLine("获取玩家成功 " + pd.score);
-        else
-            Console.WriteLine("获取玩家数据失败");
+        //PlayerData pd = dataMgr.GetPlayerData("Wyy");
+        //if (pd != null)
+        //    Console.WriteLine("获取玩家成功 " + pd.score);
+        //else
+        //    Console.WriteLine("获取玩家数据失败");
 
-        pd.score += 10;
-        Player p = new Player();
-        p.id = "Wyy";
-        p.data = pd;
-        dataMgr.SavePlayer(p);
+        //pd.score += 10;
+        //Player p = new Player();
+        //p.id = "Wyy";
+        //p.data = pd;
+        //dataMgr.SavePlayer(p);
 
-        pd = dataMgr.GetPlayerData("Wyy");
-        if (pd != null)
-            Console.WriteLine("获取玩家成功 " + pd.score);
-        else
-            Console.WriteLine("获取玩家数据失败");
+        //pd = dataMgr.GetPlayerData("Wyy");
+        //if (pd != null)
+        //    Console.WriteLine("获取玩家成功 " + pd.score);
+        //else
+        //    Console.WriteLine("获取玩家数据失败");
     }
 }

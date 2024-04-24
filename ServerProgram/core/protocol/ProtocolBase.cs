@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ServerProgram.core
+namespace ServerProgram.core.protocol
 {
     // 协议基类
     public class ProtocolBase

@@ -10,6 +10,7 @@ using MySql.Data.MySqlClient;
 using ServerProgram.core.protocol;
 using ServerProgram.logic;
 using System.Reflection;
+using MyGameProto;
 
 namespace ServerProgram.core
 {
@@ -36,10 +37,11 @@ namespace ServerProgram.core
         /// 通常TCP断开连接需经历四次挥手，如客户端自己、断网等，四次挥手无法完成。
         /// 而服务器在同一时间能够接入的客户端数量是有限的，过量死连接会导致新连接无法进入。
         /// </summary>
-        public long heartBeatTime = 180;
+        public long heartBeatTime = 10;
 
         // 协议
-        public ProtocolBase proto;
+        //public ProtocolBase proto;
+        public ProtocolProtobuf<MyGameReq> protocol = new ProtocolProtobuf<MyGameReq>();
 
         // 消息分发
         public HandleConnMsg handleConnMsg = new HandleConnMsg();
@@ -230,8 +232,11 @@ namespace ServerProgram.core
             }
             // 处理消息
             //string str = Encoding.UTF8.GetString(conn.readBuff, sizeof(Int32), conn.msgLength);
-            ProtocolBase protocol = proto.Decode(conn.readBuff, sizeof(Int32), conn.msgLength);
-            HandleMsg(conn, protocol);
+            //ProtocolBase protocol = proto.Decode(conn.readBuff, sizeof(Int32), conn.msgLength);
+            
+            
+            protocol.Decode(conn.readBuff, sizeof(Int32), conn.msgLength);
+            HandleMsg(conn);
             // 清除已处理的消息
             int count = conn.buffCount - conn.msgLength - sizeof(Int32);
             Array.Copy(conn.readBuff, sizeof(Int32) + conn.msgLength, conn.readBuff, 0, count);
@@ -244,8 +249,10 @@ namespace ServerProgram.core
         }
 
         // 发送消息
-        public void Send(Conn conn, ProtocolBase protocol)
+        public void Send(Conn conn, MyGameAck ack)
         {
+            // 在数据包头加上消息长度
+            ProtocolProtobuf<MyGameAck> protocol = new ProtocolProtobuf<MyGameAck>(ack);
             byte[] bytes = protocol.Encode();
             byte[] length = BitConverter.GetBytes(bytes.Length);
             byte[] sendBuff = length.Concat(bytes).ToArray();
@@ -259,7 +266,7 @@ namespace ServerProgram.core
             }
         }
 
-        public void BroadCast(ProtocolBase protocol)
+        public void BroadCast(MyGameAck ack)
         {
             for (int i = 0; i < conns.Length ; i++)
             {
@@ -267,18 +274,28 @@ namespace ServerProgram.core
                     continue;
                 if (conns[i].player == null)
                     continue;
-                Send(conns[i], protocol);
+                Send(conns[i], ack);
             }
 
         }
 
-        public void HandleMsg(Conn conn, ProtocolBase protoBase)
-        {
-            string name = protoBase.GetName();
+        public void HandleMsg(Conn conn)
+        {   
+            string name = protocol.GetName();
             Console.WriteLine("[收到协议] " + name);
             string methodName = "Msg" + name;
+            MyGameReq msg = protocol.GetMessage();
             // 通过反射的方法，用协议名获取处理函数
             // 连接协议分发
+            if (msg.ConnReq != null)
+            {
+                handleConnMsg.HandleMsg(conn, msg.ConnReq);
+            }
+            else if(msg.PlayerReq != null)
+            { 
+                
+            }
+
             if (conn.player == null || name == "HeartBeat" || name == "Logout")
             {
                 MethodInfo mm = handleConnMsg.GetType().GetMethod(methodName);
@@ -288,7 +305,7 @@ namespace ServerProgram.core
                     Console.WriteLine(str + methodName);
                     return;
                 }
-                Object[] obj = new object[]{conn, protoBase};
+                Object[] obj = new object[]{conn, protocol};
                 Console.WriteLine("[处理连接消息]" + conn.GetAdress() + " :" + name);
                 mm.Invoke(handleConnMsg, obj);
             }
@@ -302,7 +319,7 @@ namespace ServerProgram.core
                     Console.WriteLine(str + methodName);
                     return;
                 }
-                Object[] obj = new object[] { conn, protoBase };
+                Object[] obj = new object[] { conn, protocol };
                 Console.WriteLine("[处理玩家消息]" + conn.GetAdress() + " :" + name);
                 mm.Invoke(handlePlayerMsg, obj);
             }
