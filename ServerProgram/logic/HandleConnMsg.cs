@@ -54,15 +54,54 @@ namespace ServerProgram.logic
             // 创建角色
             DataMgr.instance.CreatePlayer(id);
 
-            MyGameAck myGameAck = GetMyGameAck();
+            MyGameAck myGameAck = GetConnAck();
             myGameAck.ConnAck.RegisterAck = ack;
 
             SendMsg(conn, myGameAck);
         }
 
-        private MyGameAck GetMyGameAck()
+        public void HandleLoginReq(Conn conn, LoginReq req)
+        {
+            string id = req.Id;
+            string pw = req.Pw;
+
+            Console.WriteLine("[收到登录协议]" + conn.GetAdress() + "用户名：" + id + "密码：" + pw);
+
+            // 构建返回协议
+            MyGameAck myGameAck = GetConnAck();
+
+            // 验证
+            if (!DataMgr.instance.CheckPassWord(id, pw))
+            {
+                LoginAck ack = new LoginAck();
+                myGameAck.ConnAck.LoginAck = ack;
+                ack.Result = -1;
+               
+                SendMsg(conn, myGameAck);
+                return;
+            }
+
+            // 是否已经登录
+            if (!Player.KickOff(id, myGameAck))
+            {
+                LogoutAck logoutAck = new LogoutAck();
+                myGameAck.ConnAck.LogoutAck = logoutAck;
+                logoutAck.Result = -1;
+            }
+
+            // 获取玩家数据
+            PlayerData playerData = DataMgr.instance.GetPlayerData(id);
+            if (playerData == null)
+            {
+
+            }
+        }
+
+        private MyGameAck GetConnAck()
         {
             MyGameAck ack = new MyGameAck();
+            ConnAck connAck = new ConnAck();
+            ack.ConnAck = connAck;
             return ack;
         }
 

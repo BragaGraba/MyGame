@@ -3,9 +3,20 @@ syntax = "proto3";
 option csharp_namespace = "MyGameProto"; // 设置C#命名空间
 
 message PlayerReq {
-
+	optional GetScoreReq get_score_req = 1;
+	optional AddScoreReq add_score_req = 2;
 }
 
 message PlayerAck {
+	optional GetScoreAck get_score_ack = 1;
+}
 
+message GetScoreReq {
+}
+
+message GetScoreAck {
+	optional int32 score = 1; // 分数
+}
+
+message AddScoreReq { // 无参数 无返回
 }

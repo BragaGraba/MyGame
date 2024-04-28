@@ -4,10 +4,16 @@ option csharp_namespace = "MyGameProto"; // 设置C#命名空间
 
 message ConnReq {
 	optional RegisterReq register_req = 1;
+	optional HeartBeatReq heart_beat_req = 2;
+	optional LoginReq login_req = 3;
+	optional LogoutReq logout_req = 4;
 }
 
 message ConnAck {
 	optional RegisterAck register_ack = 1;
+	optional HeartBeatAck heart_beat_ack = 2;
+	optional LoginAck login_ack = 3;
+	optional LogoutAck logout_ack = 4;
 }
 
 message RegisterReq {
@@ -16,5 +22,30 @@ message RegisterReq {
 }
 
 message RegisterAck {
+	optional int32 result = 1;
+}
+
+message HeartBeatReq {
+
+}
+
+message HeartBeatAck {
+
+}
+
+message LoginReq {
+	optional string id = 1;
+	optional string pw = 2;
+}
+
+message LoginAck {
+	optional int32 result = 1;
+}
+
+message LogoutReq {
+	optional int32 result = 1; // 下线原因
+}
+
+message LogoutAck {
 	optional int32 result = 1;
 }

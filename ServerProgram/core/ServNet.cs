@@ -11,6 +11,7 @@ using ServerProgram.core.protocol;
 using ServerProgram.logic;
 using System.Reflection;
 using MyGameProto;
+using ServerProgram.core.manager;
 
 namespace ServerProgram.core
 {
@@ -54,6 +55,7 @@ namespace ServerProgram.core
         public ServNet()
         {
             instance = this;
+            DataMgr dataMgr = new DataMgr();
         }
 
         // 获取连接池索引，返回负数表示失败
@@ -80,9 +82,9 @@ namespace ServerProgram.core
         public void Start(string host, int port)
         {
             // 定时器
-            timer.Elapsed += new System.Timers.ElapsedEventHandler(HandleMainTimer);
-            timer.AutoReset = false;
-            timer.Enabled = true;
+            //timer.Elapsed += new System.Timers.ElapsedEventHandler(HandleMainTimer);
+            //timer.AutoReset = false;
+            //timer.Enabled = true;
 
             string connStr = "Database=msgboard;Data Source=127.0.0.1;";
             connStr += "Server=localhost;User=root; Password = 123456; port = 3306";
@@ -182,11 +184,14 @@ namespace ServerProgram.core
             {
                 try
                 {
-                    Socket socket = listenfd.EndAccept(ar);
                     int count = conn.socket.EndReceive(ar);
+
+                    // 关闭信号
                     if (count <= 0)
                     {
-                        socket.Close();
+                        Console.WriteLine("收到 [" + conn.GetAdress() + "] 断开连接");
+                        conn.Close();
+                        return;
                     }
                     else
                     {
@@ -233,7 +238,6 @@ namespace ServerProgram.core
             // 处理消息
             //string str = Encoding.UTF8.GetString(conn.readBuff, sizeof(Int32), conn.msgLength);
             //ProtocolBase protocol = proto.Decode(conn.readBuff, sizeof(Int32), conn.msgLength);
-            
             
             protocol.Decode(conn.readBuff, sizeof(Int32), conn.msgLength);
             HandleMsg(conn);
@@ -283,7 +287,6 @@ namespace ServerProgram.core
         {   
             string name = protocol.GetName();
             Console.WriteLine("[收到协议] " + name);
-            string methodName = "Msg" + name;
             MyGameReq msg = protocol.GetMessage();
             // 通过反射的方法，用协议名获取处理函数
             // 连接协议分发
@@ -296,33 +299,33 @@ namespace ServerProgram.core
                 
             }
 
-            if (conn.player == null || name == "HeartBeat" || name == "Logout")
-            {
-                MethodInfo mm = handleConnMsg.GetType().GetMethod(methodName);
-                if (mm == null)
-                {
-                    string str = "[警告]HandleMsg没有处理连接方法";
-                    Console.WriteLine(str + methodName);
-                    return;
-                }
-                Object[] obj = new object[]{conn, protocol};
-                Console.WriteLine("[处理连接消息]" + conn.GetAdress() + " :" + name);
-                mm.Invoke(handleConnMsg, obj);
-            }
-            // 角色协议分发
-            else
-            {
-                MethodInfo mm = handlePlayerMsg.GetType().GetMethod(methodName);
-                if (mm == null)
-                {
-                    string str = "[警告]HandleMsg没有处理玩家方法";
-                    Console.WriteLine(str + methodName);
-                    return;
-                }
-                Object[] obj = new object[] { conn, protocol };
-                Console.WriteLine("[处理玩家消息]" + conn.GetAdress() + " :" + name);
-                mm.Invoke(handlePlayerMsg, obj);
-            }
+            //if (conn.player == null || name == "HeartBeat" || name == "Logout")
+            //{
+            //    MethodInfo mm = handleConnMsg.GetType().GetMethod(methodName);
+            //    if (mm == null)
+            //    {
+            //        string str = "[警告]HandleMsg没有处理连接方法";
+            //        Console.WriteLine(str + methodName);
+            //        return;
+            //    }
+            //    Object[] obj = new object[]{conn, protocol};
+            //    Console.WriteLine("[处理连接消息]" + conn.GetAdress() + " :" + name);
+            //    mm.Invoke(handleConnMsg, obj);
+            //}
+            //// 角色协议分发
+            //else
+            //{
+            //    MethodInfo mm = handlePlayerMsg.GetType().GetMethod(methodName);
+            //    if (mm == null)
+            //    {
+            //        string str = "[警告]HandleMsg没有处理玩家方法";
+            //        Console.WriteLine(str + methodName);
+            //        return;
+            //    }
+            //    Object[] obj = new object[] { conn, protocol };
+            //    Console.WriteLine("[处理玩家消息]" + conn.GetAdress() + " :" + name);
+            //    mm.Invoke(handlePlayerMsg, obj);
+            //}
         }
 
         // 主定时器
