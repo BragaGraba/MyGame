@@ -19,11 +19,29 @@ namespace ServerProgram.logic
             {
                 HandleRegisterReq(conn, req.RegisterReq);
             }
+            else if (req.HeartBeatReq != null)
+            {
+                HandleHeartBeatReq(conn);
+            }
+            else if (req.LoginReq != null)
+            {
+                HandleLoginReq(conn, req.LoginReq);
+            }
+            else if (req.LogoutReq != null)
+            {
+                HandleLogoutReq(conn, req.LogoutReq);
+            }
         }
-        public void MsgHeartBeat(Conn conn, ProtocolBase protoBase)
+        public void HandleHeartBeatReq(Conn conn)
         {
             conn.lastTickTime = Sys.GetTimeStamp();
             Console.WriteLine("[更新心跳时间] " + conn.GetAdress());
+
+            HeartBeatAck heartBeatAck = new HeartBeatAck();
+            MyGameAck myGameAck = GetConnAck();
+            myGameAck.ConnAck.HeartBeatAck = heartBeatAck;
+
+            SendMsg(conn, myGameAck);
         }
 
         ///<Summary>
@@ -81,19 +99,57 @@ namespace ServerProgram.logic
                 return;
             }
 
-            // 是否已经登录
-            if (!Player.KickOff(id, myGameAck))
+            // 是否已经登录 如果玩家已经登录，则踢下线，发送Logout协议
+            MyGameAck kickOffAck = GetConnAck();
+            LogoutAck logoutAck = new LogoutAck();
+            kickOffAck.ConnAck.LogoutAck = logoutAck;
+            logoutAck.Result = -1;
+            if (Player.KickOff(id, kickOffAck))
             {
-                LogoutAck logoutAck = new LogoutAck();
-                myGameAck.ConnAck.LogoutAck = logoutAck;
-                logoutAck.Result = -1;
+                return;
             }
 
             // 获取玩家数据
             PlayerData playerData = DataMgr.instance.GetPlayerData(id);
             if (playerData == null)
             {
+                LoginAck ack = new LoginAck();
+                myGameAck.ConnAck.LoginAck = ack;
+                ack.Result = -1;
 
+                SendMsg(conn, myGameAck);
+                return;
+            }
+            conn.player = new Player(id, conn);
+            conn.player.data = playerData;
+
+            // 事件触发
+            ServNet.instance.handlePlayerEvent.OnLogin(conn.player);
+
+            LoginAck loginAck = new LoginAck();
+            myGameAck.ConnAck.LoginAck = loginAck;
+            loginAck.Result = 0;
+
+            SendMsg(conn, myGameAck);
+            return;
+        }
+
+        public void HandleLogoutReq(Conn conn, LogoutReq req)
+        {
+            Console.WriteLine("[收到登出协议]" + conn.GetAdress());
+            MyGameAck myGameAck = GetConnAck();
+            LogoutAck logoutAck = new LogoutAck();
+            logoutAck.Result = 0;
+            myGameAck.ConnAck.LogoutAck = logoutAck;
+            if (conn.player == null)
+            {
+                SendMsg(conn, myGameAck);
+                conn.Close();
+            }
+            else
+            {
+                SendMsg(conn, myGameAck);
+                conn.player.Logout();
             }
         }
 

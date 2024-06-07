@@ -11,7 +11,7 @@ namespace ServerProgram.logic
     {
         public void OnLogin(Player player)
         {
-
+            
         }
         
         public void OnLogout(Player player)

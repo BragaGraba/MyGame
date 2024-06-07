@@ -38,7 +38,7 @@ namespace ServerProgram.core
         /// 通常TCP断开连接需经历四次挥手，如客户端自己、断网等，四次挥手无法完成。
         /// 而服务器在同一时间能够接入的客户端数量是有限的，过量死连接会导致新连接无法进入。
         /// </summary>
-        public long heartBeatTime = 10;
+        public long heartBeatTime = 180;
 
         // 协议
         //public ProtocolBase proto;
@@ -110,22 +110,28 @@ namespace ServerProgram.core
             }
 
             // Socket
+            // 参数1：地址簇，指明使用IPv4
+            // 参数2：套接字类型，Stream支持可靠、双向、基于连接的字节流，既不重复数据，也不保留边界
+            // 参数3：协议，指明使用Tcp协议
             listenfd = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
-            // Bind
+            // Bind 给套接字绑定IP和端口
             IPAddress ipAdr = IPAddress.Parse(host);
             IPEndPoint ipEp = new IPEndPoint(ipAdr, port);
             listenfd.Bind(ipEp);
 
-            // Listen
+            // Listen 开启监听，参数backlog指定队列中最多可容纳等待接受的连接数
             listenfd.Listen(maxConn);
 
-            // Accept
+            // Accept 异步方法接收客户端连接
             listenfd.BeginAccept(AcceptCb, null);
             Console.WriteLine("[服务器]启动成功");
         }
 
         // Accept 回调
+        // 给新的连接分配连接实例
+        // 异步接收客户端数据
+        // 再次调用BeginAccept实现循环
         private void AcceptCb(IAsyncResult ar)
         {
             try
@@ -199,7 +205,8 @@ namespace ServerProgram.core
                         ProcessData(conn);
                     }
 
-                    listenfd.BeginAccept(AcceptCb, null);
+                    // 异步接受客户端数据
+                    conn.socket.BeginReceive(conn.readBuff, conn.buffCount, conn.BuffRemain(), SocketFlags.None, ReceiveCb, conn);
                 }
                 catch (Exception e)
                 {
@@ -218,11 +225,6 @@ namespace ServerProgram.core
         */
         private void ProcessData(Conn conn)
         { 
-            // 规定更新心跳时间的协议
-            //string str = Encoding.UTF8.GetString("...");
-            //if (str == "HeartBeat")
-            //    conn.lastTickTime = Sys.GetTimeStamp();
-
             // 小于长度4字节
             if (conn.buffCount < sizeof(Int32))
             {

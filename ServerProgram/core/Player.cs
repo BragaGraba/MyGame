@@ -57,12 +57,13 @@ namespace ServerProgram.core
                     return conns[i].player.Logout();
                 }
             }
-            return true;
+            return false;
         }
 
         public bool Logout()
         {
             // 事件处理
+            ServNet.instance.handlePlayerEvent.OnLogout(this);
 
             // 保存
             if (!DataMgr.instance.SavePlayer(this))

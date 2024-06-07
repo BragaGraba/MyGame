@@ -73,7 +73,7 @@ namespace ServerProgram.core.protocol
 
         public override string GetName()
         {
-            return typeof(T).Name + "Protocol";
+            return typeof(T).Name;
         }
 
         public override string GetDesc()
